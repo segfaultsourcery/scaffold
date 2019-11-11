@@ -1,17 +1,18 @@
 use serde_derive::{Deserialize, Serialize};
-use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 use toml::Value;
+use std::iter::FromIterator;
+use indexmap::IndexMap;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
-    pub dependencies: BTreeMap<String, Value>,
-    pub package: BTreeMap<String, Value>,
+    pub package: IndexMap<String, Value>,
+    pub dependencies: IndexMap<String, Value>,
 
     #[serde(flatten)]
-    pub other: BTreeMap<String, Value>,
+    pub other: IndexMap<String, Value>,
 }
 
 #[derive(Debug)]
@@ -50,24 +51,44 @@ pub fn write_toml_file(path: &str, config: &Config) -> Result<(), Error> {
     }
 }
 
+pub fn sort_dependencies(toml: &mut Config) {
+    let mut dependencies = Vec::from_iter(&toml.dependencies);
+
+    dependencies.sort_by_key(|&(key, value)| {
+        let weight = match value {
+            Value::Table(_) => 1,
+            _ => 0,
+        };
+
+        (weight, key)
+    });
+
+    let mut new_dependencies = IndexMap::new();
+    for (key, value) in dependencies {
+        new_dependencies.insert(key.to_string(), value.to_owned());
+    }
+
+    println!("new_dependencies = {:#?}", &new_dependencies);
+
+    toml.dependencies = new_dependencies;
+}
 
 pub fn add_serde(toml: &mut Config) {
+    toml.dependencies.insert("serde_derive".to_string(), Value::String("1.0".to_string()));
     toml.dependencies.insert("serde".to_string(), toml::toml!{
         version = "1.0"
         features = ["derive"]
     });
-
-    toml.dependencies.insert("serde_derive".to_string(), Value::String("1.0".to_string()));
 }
 
 pub fn add_json(toml: &mut Config) {
-    add_serde(toml);
     toml.dependencies.insert("serde_json".to_string(), Value::String("1.0".to_string()));
+    add_serde(toml);
 }
 
 pub fn add_toml(toml: &mut Config) {
-    add_serde(toml);
     toml.dependencies.insert("toml".to_string(), Value::String("0.5".to_string()));
+    add_serde(toml);
 }
 
 pub fn add_structopt(toml: &mut Config) {

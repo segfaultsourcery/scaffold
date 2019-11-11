@@ -60,6 +60,10 @@ fn main() {
                 }
             }
 
+            toml_editor::sort_dependencies(&mut toml);
+
+            println!("toml = {:#?}", toml);
+
             toml_editor::write_toml_file(&arguments.path, &toml).unwrap();
         }
     }
