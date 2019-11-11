@@ -43,7 +43,7 @@ enum Subcommand {
     #[structopt(about = "Add actix-web, actix-files, and actix-session.")]
     ActixWebServer,
 
-    #[structopt(about = "Add structopt and config.")]
+    #[structopt(about = "Add structopt, and config.")]
     Cli,
 }
 

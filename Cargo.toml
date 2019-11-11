@@ -1,5 +1,5 @@
 [package]
-version = "0.1.1"
+version = "0.1.2"
 description = "Quickly add dependencies to your Rust project."
 categories = ["command-line-utilities", "config", "development-tools", "text-editors"]
 keywords = ["toml", "cargo", "scaffold", "productivity"]
@@ -9,6 +9,7 @@ edition = "2018"
 homepage = "https://github.com/segfaultsourcery/scaffold"
 documentation = "https://github.com/segfaultsourcery/scaffold"
 license = "MIT"
+readme = "README.md"
 
 [dependencies]
 serde_derive = "1.0"

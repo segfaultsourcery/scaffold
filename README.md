@@ -1,10 +1,10 @@
 # Scaffold
 ### Quickly add dependencies to your existing Rust project.
 
-[Find it on crates.io](https://crates.io/crates/scaffold)
-
 I find myself always scouring the internet or looking through old projects to find the same dependencies over and over.
 This is a tool I made to automate that process.
+
+[Find it on crates.io](https://crates.io/crates/scaffold)
 
 The help screen really says it all.
 
