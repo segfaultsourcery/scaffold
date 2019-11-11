@@ -1,5 +1,5 @@
 use serde_derive::{Deserialize, Serialize};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Read;
 use std::io::Write;
@@ -61,18 +61,16 @@ pub fn add_serde(toml: &mut Config) {
 }
 
 pub fn add_json(toml: &mut Config) {
-    let key = "json".to_string();
     add_serde(toml);
     toml.dependencies.insert("serde_json".to_string(), Value::String("1.0".to_string()));
 }
 
 pub fn add_toml(toml: &mut Config) {
-    let key = "toml".to_string();
+    add_serde(toml);
     toml.dependencies.insert("toml".to_string(), Value::String("0.5".to_string()));
 }
 
 pub fn add_structopt(toml: &mut Config) {
-    let key = "structopt".to_string();
     toml.dependencies.insert("structopt".to_string(), Value::String("0.3".to_string()));
 }
 

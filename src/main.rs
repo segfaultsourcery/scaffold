@@ -25,20 +25,32 @@ impl FromStr for Addition {
 }
 
 #[derive(Debug, StructOpt)]
-#[structopt(name = "scaffold", about = "Quick edit your Rust project.")]
-enum Arguments {
+enum Subcommand {
     #[structopt()]
     Add { additions: Vec<Addition> },
 }
 
+#[derive(Debug, StructOpt)]
+#[structopt(name = "scaffold", about = "Quick edit your Rust project.")]
+struct Arguments {
+    #[structopt(long, default_value = "Cargo.toml")]
+    path: String,
+
+    #[structopt(subcommand)]
+    subcommand: Subcommand,
+}
+
 fn main() {
     let arguments: Arguments = Arguments::from_args();
-    println!("arguments = {:#?}", arguments);
+    let mut toml = toml_editor::read_toml_file(&arguments.path).unwrap();
 
-    let mut toml = toml_editor::read_toml_file("Cargo.toml").unwrap();
+    match arguments.subcommand {
+        Subcommand::Add { additions } => {
+            if additions.is_empty() {
+                eprintln!("There's nothing to do.");
+                return;
+            }
 
-    match arguments {
-        Arguments::Add { additions } => {
             for addition in additions {
                 match addition {
                     Addition::Json => toml_editor::add_json(&mut toml),
@@ -47,8 +59,8 @@ fn main() {
                     Addition::Toml => toml_editor::add_toml(&mut toml),
                 }
             }
+
+            toml_editor::write_toml_file(&arguments.path, &toml).unwrap();
         }
     }
-
-    println!("toml = {:#?}", toml);
 }
