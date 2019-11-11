@@ -1,9 +1,13 @@
 [package]
+version = "0.1.1"
+description = "Quickly add dependencies to your Rust project."
+categories = ["command-line-utilities", "config", "development-tools", "text-editors"]
+keywords = ["toml", "cargo", "scaffold", "productivity"]
 name = "scaffold"
-version = "0.1.0"
 authors = ["Kim Hermansson <h4xrk1m@gmail.com>"]
 edition = "2018"
-description = "Quickly add dependencies to your Rust project."
+homepage = "https://github.com/segfaultsourcery/scaffold"
+documentation = "https://github.com/segfaultsourcery/scaffold"
 license = "MIT"
 
 [dependencies]
@@ -11,14 +15,13 @@ serde_derive = "1.0"
 structopt = "0.3"
 
 [dependencies.indexmap]
-version = "1.3"
 features = ["serde-1"]
+version = "1.3"
 
 [dependencies.serde]
 features = ["derive"]
 version = "1.0"
 
 [dependencies.toml]
-version = "0.5"
 features = ["preserve_order"]
-
+version = "0.5"
