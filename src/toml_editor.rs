@@ -1,4 +1,4 @@
-use crate::version_getter::get_crate_version;
+use crate::version_getter::VersionGetter;
 use indexmap::IndexMap;
 use serde_derive::{Deserialize, Serialize};
 use std::fs::File;
@@ -14,6 +14,9 @@ pub struct Config {
 
     #[serde(flatten)]
     pub other: IndexMap<String, Value>,
+
+    #[serde(skip)]
+    version_getter: VersionGetter,
 }
 
 #[derive(Debug)]
@@ -52,97 +55,111 @@ pub fn write_toml_file(path: &str, config: &Config) -> Result<(), Error> {
     }
 }
 
-pub fn sort_dependencies(toml: &mut Config) {
-    let mut dependencies = Vec::from_iter(&toml.dependencies);
+impl Config {
+    pub fn sort_dependencies(&mut self) {
+        let mut dependencies = Vec::from_iter(&self.dependencies);
 
-    dependencies.sort_by_key(|&(key, value)| {
-        let weight = match value {
-            Value::Table(_) => 1,
-            _ => 0,
-        };
+        dependencies.sort_by_key(|&(key, value)| {
+            let weight = match value {
+                Value::Table(_) => 1,
+                _ => 0,
+            };
 
-        (weight, key)
-    });
+            (weight, key)
+        });
 
-    let mut new_dependencies = IndexMap::new();
-    for (key, value) in dependencies {
-        new_dependencies.insert(key.to_string(), value.to_owned());
+        let mut new_dependencies = IndexMap::new();
+        for (key, value) in dependencies {
+            new_dependencies.insert(key.to_string(), value.to_owned());
+        }
+
+        self.dependencies = new_dependencies;
     }
-
-    toml.dependencies = new_dependencies;
 }
 
-pub fn add_serde(toml: &mut Config) {
-    let name = "serde".to_string();
-    let version = get_crate_version(&name).unwrap();
-    toml.dependencies.insert(
-        name,
-        toml::toml! {
-            version = version
-            features = ["derive"]
-        },
-    );
-}
-
-pub fn add_serde_derive(toml: &mut Config) {
-    let name = "serde_derive".to_string();
-    let version = get_crate_version(&name).unwrap();
-    toml.dependencies.insert(name, Value::String(version));
-}
-
-pub fn add_serde_json(toml: &mut Config) {
-    let name = "serde_json".to_string();
-    let version = get_crate_version(&name).unwrap();
-    toml.dependencies.insert(name, Value::String(version));
-}
-
-pub fn add_toml(toml: &mut Config, preserve_order: bool) {
-    let name = "toml".to_string();
-    let version = get_crate_version(&name).unwrap();
-
-    if preserve_order {
-        toml.dependencies.insert(
+impl Config {
+    pub fn add_serde(&mut self) {
+        let name = "serde".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
+        self.dependencies.insert(
             name,
-            toml::toml! {version = version
-            features = ["preserve_order"]},
+            toml::toml! {
+                version = version
+                features = ["derive"]
+            },
         );
-    } else {
-        toml.dependencies.insert(name, Value::String(version));
     }
-}
 
-pub fn add_structopt(toml: &mut Config) {
-    let name = "structopt".to_string();
-    let version = get_crate_version(&name).unwrap();
-    toml.dependencies.insert(name, Value::String(version));
-}
+    pub fn add_serde_derive(&mut self) {
+        let name = "serde_derive".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
+        self.dependencies.insert(name, Value::String(version));
 
-pub fn add_regex(toml: &mut Config) {
-    let name = "regex".to_string();
-    let version = get_crate_version(&name).unwrap();
-    toml.dependencies.insert(name, Value::String(version));
-}
+        self.add_serde();
+    }
 
-pub fn add_reqwest(toml: &mut Config) {
-    let name = "reqwest".to_string();
-    let version = get_crate_version(&name).unwrap();
-    toml.dependencies.insert(name, Value::String(version));
-}
+    pub fn add_serde_json(&mut self) {
+        let name = "serde_json".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
+        self.dependencies.insert(name, Value::String(version));
 
-pub fn add_lazy_static(toml: &mut Config) {
-    let name = "lazy_static".to_string();
-    let version = get_crate_version(&name).unwrap();
-    toml.dependencies.insert(name, Value::String(version));
-}
+        self.add_serde();
+        self.add_serde_derive();
+    }
 
-pub fn add_rand(toml: &mut Config) {
-    let name = "rand".to_string();
-    let version = get_crate_version(&name).unwrap();
-    toml.dependencies.insert(name, Value::String(version));
-}
+    pub fn add_toml(&mut self, preserve_order: bool) {
+        let name = "toml".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
 
-pub fn add_base64(toml: &mut Config) {
-    let name = "base64".to_string();
-    let version = get_crate_version(&name).unwrap();
-    toml.dependencies.insert(name, Value::String(version));
+        if preserve_order {
+            self.dependencies.insert(
+                name,
+                toml::toml! {version = version
+                features = ["preserve_order"]},
+            );
+        } else {
+            self.dependencies.insert(name, Value::String(version));
+        }
+
+        self.add_serde();
+        self.add_serde_derive();
+    }
+
+    pub fn add_structopt(&mut self) {
+        let name = "structopt".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
+        self.dependencies.insert(name, Value::String(version));
+    }
+
+    pub fn add_regex(&mut self) {
+        let name = "regex".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
+        self.dependencies.insert(name, Value::String(version));
+
+        self.add_lazy_static();
+    }
+
+    pub fn add_reqwest(&mut self) {
+        let name = "reqwest".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
+        self.dependencies.insert(name, Value::String(version));
+    }
+
+    pub fn add_lazy_static(&mut self) {
+        let name = "lazy_static".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
+        self.dependencies.insert(name, Value::String(version));
+    }
+
+    pub fn add_rand(&mut self) {
+        let name = "rand".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
+        self.dependencies.insert(name, Value::String(version));
+    }
+
+    pub fn add_base64(&mut self) {
+        let name = "base64".to_string();
+        let version = self.version_getter.get_crate_version(&name).unwrap();
+        self.dependencies.insert(name, Value::String(version));
+    }
 }

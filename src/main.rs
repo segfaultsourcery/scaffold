@@ -72,22 +72,20 @@ fn main() {
 
             for addition in additions {
                 match addition {
-                    Addition::SerdeJson => toml_editor::add_serde_json(&mut toml),
-                    Addition::Serde => toml_editor::add_serde(&mut toml),
-                    Addition::StructOpt => toml_editor::add_structopt(&mut toml),
-                    Addition::Toml { preserve_order } => {
-                        toml_editor::add_toml(&mut toml, preserve_order)
-                    }
-                    Addition::Regex => toml_editor::add_regex(&mut toml),
-                    Addition::Reqwest => toml_editor::add_reqwest(&mut toml),
-                    Addition::LazyStatic => toml_editor::add_lazy_static(&mut toml),
-                    Addition::Rand => toml_editor::add_rand(&mut toml),
-                    Addition::Base64 => toml_editor::add_base64(&mut toml),
-                    Addition::SerdeDerive => toml_editor::add_serde_derive(&mut toml),
+                    Addition::SerdeJson => toml.add_serde_json(),
+                    Addition::Serde => toml.add_serde(),
+                    Addition::StructOpt => toml.add_structopt(),
+                    Addition::Toml { preserve_order } => toml.add_toml(preserve_order),
+                    Addition::Regex => toml.add_regex(),
+                    Addition::Reqwest => toml.add_reqwest(),
+                    Addition::LazyStatic => toml.add_lazy_static(),
+                    Addition::Rand => toml.add_rand(),
+                    Addition::Base64 => toml.add_base64(),
+                    Addition::SerdeDerive => toml.add_serde_derive(),
                 }
             }
 
-            toml_editor::sort_dependencies(&mut toml);
+            toml.sort_dependencies();
             toml_editor::write_toml_file(&arguments.path, &toml).unwrap();
         }
     }
