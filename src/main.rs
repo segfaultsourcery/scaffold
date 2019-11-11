@@ -5,7 +5,7 @@ mod version_getter;
 
 #[derive(Debug, StructOpt)]
 enum Subcommand {
-    #[structopt(about = "Add a crate.")]
+    #[structopt(about = "Add a crate not listed here.")]
     Crate {
         name: String,
 
@@ -13,7 +13,7 @@ enum Subcommand {
         features: Vec<String>,
     },
 
-    #[structopt(about = "Add multiple crates.")]
+    #[structopt(about = "Add multiple crates not listed here.")]
     Crates { names: Vec<String> },
 
     #[structopt(about = "Add serde, serde_derive, and serde_json.")]
