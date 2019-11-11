@@ -8,7 +8,7 @@ use std::iter::FromIterator;
 use toml::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Config {
+pub(crate) struct Config {
     pub package: IndexMap<String, Value>,
     pub dependencies: IndexMap<String, Value>,
 
@@ -20,13 +20,13 @@ pub struct Config {
 }
 
 #[derive(Debug)]
-pub enum Error {
+pub(crate) enum Error {
     Io(std::io::Error),
     TomlSer(toml::ser::Error),
     TomlDe(toml::de::Error),
 }
 
-pub fn read_toml_file(path: &str) -> Result<Config, Error> {
+pub(crate) fn read_toml_file(path: &str) -> Result<Config, Error> {
     match File::open(path) {
         Ok(mut handle) => {
             let mut buffer = String::new();
@@ -42,7 +42,7 @@ pub fn read_toml_file(path: &str) -> Result<Config, Error> {
     }
 }
 
-pub fn write_toml_file(path: &str, config: &Config) -> Result<(), Error> {
+pub(crate) fn write_toml_file(path: &str, config: &Config) -> Result<(), Error> {
     match toml::to_string(config) {
         Ok(buffer) => match File::create(&path) {
             Ok(mut handle) => match handle.write_all(buffer.as_bytes()) {
