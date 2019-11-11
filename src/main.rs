@@ -5,27 +5,46 @@ mod version_getter;
 
 #[derive(Debug, StructOpt)]
 enum Subcommand {
+    #[structopt(about = "Add a crate.")]
     Crate {
         name: String,
 
         #[structopt(long)]
         features: Vec<String>,
     },
-    Crates {
-        names: Vec<String>,
-    },
 
+    #[structopt(about = "Add multiple crates.")]
+    Crates { names: Vec<String> },
+
+    #[structopt(about = "Add serde, serde_derive, and serde_json.")]
     Json,
+
+    #[structopt(about = "Add serde, serde_derive, and toml.")]
     Toml {
         #[structopt(long)]
         preserve_order: bool,
     },
+
+    #[structopt(about = "Add serde, serde_derive, and csv.")]
     Csv,
+
+    #[structopt(about = "Add reqwest.")]
     WebClient,
+
+    #[structopt(about = "Add serde, and serde_derive.")]
     Serde,
+
+    #[structopt(about = "Add regex, and lazy_static.")]
     Regex,
+
+    #[structopt(about = "Add env_logger.")]
     EnvLogger,
+
+    #[structopt(about = "Add actix-web, actix-files, and actix-session.")]
     ActixWebServer,
+
+    #[structopt(about = "Add structopt and config.")]
+    Cli,
 }
 
 #[derive(Debug, StructOpt)]
@@ -99,6 +118,10 @@ fn main() {
             toml.add_crate("actix-web", &[], arguments.verbose);
             toml.add_crate("actix-files", &[], arguments.verbose);
             toml.add_crate("actix-session", &[], arguments.verbose);
+        }
+        Subcommand::Cli => {
+            toml.add_crate("structopt", &[], arguments.verbose);
+            toml.add_crate("config", &[], arguments.verbose);
         }
     }
 
