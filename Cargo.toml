@@ -3,6 +3,8 @@ name = "scaffold"
 version = "0.1.0"
 authors = ["Kim Hermansson <h4xrk1m@gmail.com>"]
 edition = "2018"
+description = "Quickly add dependencies to your Rust project."
+license = "MIT"
 
 [dependencies]
 serde_derive = "1.0"
