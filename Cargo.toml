@@ -1,0 +1,16 @@
+[package]
+name = "scaffold"
+version = "0.1.0"
+authors = ["Kim Hermansson <h4xrk1m@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde_derive = "1.0"
+structopt = "0.3"
+toml = "0.5"
+
+[dependencies.serde]
+features = ["derive"]
+version = "1.0"
