@@ -78,88 +78,32 @@ impl Config {
 }
 
 impl Config {
-    pub fn add_serde(&mut self) {
-        let name = "serde".to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
-        self.dependencies.insert(
-            name,
-            toml::toml! {
-                version = version
-                features = ["derive"]
-            },
-        );
-    }
-
-    pub fn add_serde_derive(&mut self) {
-        let name = "serde_derive".to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
-        self.dependencies.insert(name, Value::String(version));
-
-        self.add_serde();
-    }
-
-    pub fn add_serde_json(&mut self) {
-        let name = "serde_json".to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
-        self.dependencies.insert(name, Value::String(version));
-
-        self.add_serde();
-        self.add_serde_derive();
-    }
-
-    pub fn add_toml(&mut self, preserve_order: bool) {
-        let name = "toml".to_string();
+    pub fn add_crate(&mut self, name: &str, features: &[&str], verbose: bool) {
+        let name = name.to_string();
         let version = self.version_getter.get_crate_version(&name).unwrap();
 
-        if preserve_order {
+        if features.is_empty() {
+            if verbose {
+                println!(r#"{} = "{}""#, name, version);
+            }
+            self.dependencies.insert(name, Value::String(version));
+        } else {
+            let features = features.to_vec();
+
+            if verbose {
+                println!(
+                    r#"{} = {{ version = "{}", features = {:?} }}"#,
+                    name, &version, &features
+                );
+            }
+
             self.dependencies.insert(
                 name,
-                toml::toml! {version = version
-                features = ["preserve_order"]},
+                toml::toml! {
+                    version = version
+                    features = features
+                },
             );
-        } else {
-            self.dependencies.insert(name, Value::String(version));
         }
-
-        self.add_serde();
-        self.add_serde_derive();
-    }
-
-    pub fn add_structopt(&mut self) {
-        let name = "structopt".to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
-        self.dependencies.insert(name, Value::String(version));
-    }
-
-    pub fn add_regex(&mut self) {
-        let name = "regex".to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
-        self.dependencies.insert(name, Value::String(version));
-
-        self.add_lazy_static();
-    }
-
-    pub fn add_reqwest(&mut self) {
-        let name = "reqwest".to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
-        self.dependencies.insert(name, Value::String(version));
-    }
-
-    pub fn add_lazy_static(&mut self) {
-        let name = "lazy_static".to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
-        self.dependencies.insert(name, Value::String(version));
-    }
-
-    pub fn add_rand(&mut self) {
-        let name = "rand".to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
-        self.dependencies.insert(name, Value::String(version));
-    }
-
-    pub fn add_base64(&mut self) {
-        let name = "base64".to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
-        self.dependencies.insert(name, Value::String(version));
     }
 }

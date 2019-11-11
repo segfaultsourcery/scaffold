@@ -19,3 +19,4 @@ version = "1.0"
 [dependencies.toml]
 version = "0.5"
 features = ["preserve_order"]
+
