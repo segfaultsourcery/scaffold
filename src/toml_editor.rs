@@ -1,10 +1,11 @@
+use crate::version_getter::get_crate_version;
+use indexmap::IndexMap;
 use serde_derive::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Read;
 use std::io::Write;
-use toml::Value;
 use std::iter::FromIterator;
-use indexmap::IndexMap;
+use toml::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -68,30 +69,80 @@ pub fn sort_dependencies(toml: &mut Config) {
         new_dependencies.insert(key.to_string(), value.to_owned());
     }
 
-    println!("new_dependencies = {:#?}", &new_dependencies);
-
     toml.dependencies = new_dependencies;
 }
 
 pub fn add_serde(toml: &mut Config) {
-    toml.dependencies.insert("serde_derive".to_string(), Value::String("1.0".to_string()));
-    toml.dependencies.insert("serde".to_string(), toml::toml!{
-        version = "1.0"
-        features = ["derive"]
-    });
+    let name = "serde".to_string();
+    let version = get_crate_version(&name).unwrap();
+    toml.dependencies.insert(
+        name,
+        toml::toml! {
+            version = version
+            features = ["derive"]
+        },
+    );
 }
 
-pub fn add_json(toml: &mut Config) {
-    toml.dependencies.insert("serde_json".to_string(), Value::String("1.0".to_string()));
-    add_serde(toml);
+pub fn add_serde_derive(toml: &mut Config) {
+    let name = "serde_derive".to_string();
+    let version = get_crate_version(&name).unwrap();
+    toml.dependencies.insert(name, Value::String(version));
 }
 
-pub fn add_toml(toml: &mut Config) {
-    toml.dependencies.insert("toml".to_string(), Value::String("0.5".to_string()));
-    add_serde(toml);
+pub fn add_serde_json(toml: &mut Config) {
+    let name = "serde_json".to_string();
+    let version = get_crate_version(&name).unwrap();
+    toml.dependencies.insert(name, Value::String(version));
+}
+
+pub fn add_toml(toml: &mut Config, preserve_order: bool) {
+    let name = "toml".to_string();
+    let version = get_crate_version(&name).unwrap();
+
+    if preserve_order {
+        toml.dependencies.insert(
+            name,
+            toml::toml! {version = version
+            features = ["preserve_order"]},
+        );
+    } else {
+        toml.dependencies.insert(name, Value::String(version));
+    }
 }
 
 pub fn add_structopt(toml: &mut Config) {
-    toml.dependencies.insert("structopt".to_string(), Value::String("0.3".to_string()));
+    let name = "structopt".to_string();
+    let version = get_crate_version(&name).unwrap();
+    toml.dependencies.insert(name, Value::String(version));
 }
 
+pub fn add_regex(toml: &mut Config) {
+    let name = "regex".to_string();
+    let version = get_crate_version(&name).unwrap();
+    toml.dependencies.insert(name, Value::String(version));
+}
+
+pub fn add_reqwest(toml: &mut Config) {
+    let name = "reqwest".to_string();
+    let version = get_crate_version(&name).unwrap();
+    toml.dependencies.insert(name, Value::String(version));
+}
+
+pub fn add_lazy_static(toml: &mut Config) {
+    let name = "lazy_static".to_string();
+    let version = get_crate_version(&name).unwrap();
+    toml.dependencies.insert(name, Value::String(version));
+}
+
+pub fn add_rand(toml: &mut Config) {
+    let name = "rand".to_string();
+    let version = get_crate_version(&name).unwrap();
+    toml.dependencies.insert(name, Value::String(version));
+}
+
+pub fn add_base64(toml: &mut Config) {
+    let name = "base64".to_string();
+    let version = get_crate_version(&name).unwrap();
+    toml.dependencies.insert(name, Value::String(version));
+}
