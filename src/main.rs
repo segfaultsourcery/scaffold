@@ -3,11 +3,12 @@ use crate::error::Error;
 use crate::toml_editor::Config;
 use crate::version_getter::VersionGetter;
 use arguments::Arguments;
-use std::fs::OpenOptions;
+use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
 use structopt::StructOpt;
 
 mod arguments;
+mod default_toml;
 mod error;
 mod group_reader;
 mod toml_editor;
@@ -33,16 +34,21 @@ fn main() {
 }
 
 fn ensure_groups_exist(arguments: &Arguments) -> Result<(), Error> {
-    let default = include_bytes!("default.toml");
-
     let path = arguments.get_groups_path();
 
     if path.exists() {
         return Ok(());
     }
 
+    match path.parent() {
+        None => {}
+        Some(parent) => {
+            create_dir_all(parent).unwrap();
+        }
+    }
+
     match OpenOptions::new().write(true).create_new(true).open(&path) {
-        Ok(mut file) => match file.write_all(default) {
+        Ok(mut file) => match file.write_all(default_toml::DEFAULT_TOML) {
             Ok(_) => {
                 if arguments.verbose {
                     println!("Wrote default groups to {:?}.", &path);
