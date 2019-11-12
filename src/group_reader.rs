@@ -4,6 +4,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
+use std::path::PathBuf;
 use std::str::FromStr;
 use toml::Value;
 
@@ -120,7 +121,7 @@ impl Dependency {
     }
 }
 
-pub(crate) fn get_groups(path: &str) -> Result<HashMap<String, Vec<Dependency>>, Error> {
+pub(crate) fn get_groups(path: &PathBuf) -> Result<HashMap<String, Vec<Dependency>>, Error> {
     let raw_dependency_groups = read_toml_file(path)?;
 
     let mut groups = HashMap::new();
@@ -139,7 +140,7 @@ pub(crate) fn get_groups(path: &str) -> Result<HashMap<String, Vec<Dependency>>,
     Ok(groups)
 }
 
-fn read_toml_file(path: &str) -> Result<RawDependencyGroups, Error> {
+fn read_toml_file(path: &PathBuf) -> Result<RawDependencyGroups, Error> {
     match File::open(path) {
         Ok(mut handle) => {
             let mut buffer = String::new();

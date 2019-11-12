@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -6,11 +7,21 @@ use structopt::StructOpt;
     about = "Quickly add dependencies to your Rust project."
 )]
 pub(crate) struct Arguments {
-    #[structopt(short = "p", long = "path", default_value = "Cargo.toml")]
-    pub(crate) toml_path: String,
+    #[structopt(
+        short = "p",
+        long = "path",
+        default_value = "Cargo.toml",
+        parse(from_os_str)
+    )]
+    toml_path: PathBuf,
 
-    #[structopt(short, long, default_value = "default.toml")]
-    pub(crate) groups_path: String,
+    #[structopt(
+        short = "g",
+        long = "groups",
+        default_value = "~/.config/scaffold/groups.toml",
+        parse(from_os_str)
+    )]
+    groups_path: PathBuf,
 
     #[structopt(short, long, about = "Ask for each dependency.")]
     pub ask: bool,
@@ -28,4 +39,18 @@ pub enum Subcommand {
     List,
     #[structopt(about = "Add groups to your project.")]
     Add { group_names: Vec<String> },
+}
+
+impl Arguments {
+    pub fn get_groups_path(&self) -> PathBuf {
+        Arguments::tilde(&self.groups_path)
+    }
+
+    pub fn get_toml_path(&self) -> PathBuf {
+        Arguments::tilde(&self.toml_path)
+    }
+
+    fn tilde(path: &PathBuf) -> PathBuf {
+        PathBuf::from(shellexpand::tilde(path.to_str().unwrap()).to_string())
+    }
 }

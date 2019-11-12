@@ -7,3 +7,4 @@ serde = { version = "*", features = ["derive"] }
 [cli]
 structopt = "*"
 config = "*"
+shellexpand = "*"

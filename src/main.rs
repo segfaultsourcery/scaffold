@@ -3,6 +3,8 @@ use crate::error::Error;
 use crate::toml_editor::Config;
 use crate::version_getter::VersionGetter;
 use arguments::Arguments;
+use std::fs::OpenOptions;
+use std::io::Write;
 use structopt::StructOpt;
 
 mod arguments;
@@ -13,26 +15,48 @@ mod version_getter;
 
 fn main() {
     let arguments: Arguments = Arguments::from_args();
+    ensure_groups_exist(&arguments).expect("Failed to create default scaffolding.");
 
     match &arguments.subcommand {
         Subcommand::List => {
             list_groups(&arguments).expect("Failed to read groups.");
         }
         Subcommand::Add { group_names } => {
-            let mut toml = toml_editor::read_toml_file(&arguments.toml_path).unwrap();
+            let mut toml = toml_editor::read_toml_file(&arguments.get_toml_path()).unwrap();
 
-            for group_name in group_names {
-                add_group(&mut toml, &group_name, &arguments).expect("Failure");
-            }
+            add_groups(&mut toml, &group_names, &arguments).expect("Failure");
 
             toml.sort_dependencies();
-            toml_editor::write_toml_file(&arguments.toml_path, &toml).unwrap();
+            toml_editor::write_toml_file(&arguments.get_toml_path(), &toml).unwrap();
         }
     }
 }
 
+fn ensure_groups_exist(arguments: &Arguments) -> Result<(), Error> {
+    let default = include_bytes!("default.toml");
+
+    let path = arguments.get_groups_path();
+
+    if path.exists() {
+        return Ok(());
+    }
+
+    match OpenOptions::new().write(true).create_new(true).open(&path) {
+        Ok(mut file) => match file.write_all(default) {
+            Ok(_) => {
+                if arguments.verbose {
+                    println!("Wrote default groups to {:?}.", &path);
+                }
+                Ok(())
+            }
+            Err(error) => Err(Error::Io(error)),
+        },
+        Err(error) => Err(Error::Io(error)),
+    }
+}
+
 fn list_groups(arguments: &Arguments) -> Result<(), Error> {
-    let groups = group_reader::get_groups(&arguments.groups_path)?;
+    let groups = group_reader::get_groups(&arguments.get_groups_path())?;
     let mut version_getter = VersionGetter::default();
 
     for (name, dependencies) in groups {
@@ -46,15 +70,23 @@ fn list_groups(arguments: &Arguments) -> Result<(), Error> {
     Ok(())
 }
 
-fn add_group(toml: &mut Config, group_name: &str, arguments: &Arguments) -> Result<(), Error> {
-    let groups = group_reader::get_groups(&arguments.groups_path)?;
-    match groups.get(group_name) {
-        Some(group) => {
-            for dependency in group {
-                toml.add_dependency(dependency, arguments.verbose);
+fn add_groups(
+    toml: &mut Config,
+    group_names: &[String],
+    arguments: &Arguments,
+) -> Result<(), Error> {
+    let groups = group_reader::get_groups(&arguments.get_groups_path())?;
+
+    for group_name in group_names {
+        match groups.get(group_name) {
+            Some(group) => {
+                for dependency in group {
+                    toml.add_dependency(dependency, arguments.verbose);
+                }
             }
-            Ok(())
+            None => return Err(Error::GroupNotFound(group_name.to_string())),
         }
-        None => Err(Error::GroupNotFound(group_name.to_string())),
     }
+
+    Ok(())
 }
