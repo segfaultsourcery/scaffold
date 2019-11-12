@@ -85,7 +85,7 @@ impl Config {
             let pretty_string = dependency.get_pretty_string(&mut self.version_getter);
 
             if arguments.ask {
-                print!("Add '{}'? [Y/n] ", pretty_string);
+                print!("Add {}? [Y/n] ", pretty_string);
                 stdout().flush().unwrap();
 
                 match yesno(true) {
@@ -98,7 +98,7 @@ impl Config {
             }
 
             if arguments.verbose {
-                println!("Adding {:?}.", &pretty_string);
+                println!("Adding {}.", &pretty_string);
             }
         }
 
