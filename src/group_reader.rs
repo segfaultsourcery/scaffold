@@ -137,6 +137,10 @@ pub(crate) fn get_groups(path: &PathBuf) -> Result<HashMap<String, Vec<Dependenc
         }
     }
 
+    for (_, group) in &mut groups {
+        group.sort_by_key(|it| it.name.to_string());
+    }
+
     Ok(groups)
 }
 

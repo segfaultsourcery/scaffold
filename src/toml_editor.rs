@@ -1,9 +1,12 @@
+use crate::arguments::Arguments;
 use crate::error::Error;
 use crate::group_reader::Dependency;
 use crate::version_getter::VersionGetter;
 use indexmap::IndexMap;
+use quest::yesno;
 use serde_derive::{Deserialize, Serialize};
 use std::fs::File;
+use std::io::stdout;
 use std::io::Read;
 use std::io::Write;
 use std::iter::FromIterator;
@@ -74,15 +77,29 @@ impl Config {
 }
 
 impl Config {
-    pub fn add_dependency(&mut self, dependency: &Dependency, verbose: bool) {
+    pub fn add_dependency(&mut self, dependency: &Dependency, arguments: &Arguments) {
         let name = dependency.name.to_string();
         let version = dependency.get_version_as_string(&mut self.version_getter);
 
-        if verbose {
-            println!(
-                "{}",
-                &dependency.get_pretty_string(&mut self.version_getter)
-            );
+        if arguments.ask || arguments.verbose {
+            let pretty_string = dependency.get_pretty_string(&mut self.version_getter);
+
+            if arguments.ask {
+                print!("Add '{}'? [Y/n] ", pretty_string);
+                stdout().flush().unwrap();
+
+                match yesno(true) {
+                    Ok(Some(false)) | Ok(None) => return,
+                    Err(error) => {
+                        println!("error reading input = {:#?}", error);
+                    }
+                    _ => { /* The user said yes. */ }
+                };
+            }
+
+            if arguments.verbose {
+                println!("Adding {:?}.", &pretty_string);
+            }
         }
 
         match &dependency.other {

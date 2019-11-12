@@ -87,7 +87,7 @@ fn add_groups(
         match groups.get(group_name) {
             Some(group) => {
                 for dependency in group {
-                    toml.add_dependency(dependency, arguments.verbose);
+                    toml.add_dependency(dependency, &arguments);
                 }
             }
             None => return Err(Error::GroupNotFound(group_name.to_string())),

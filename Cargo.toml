@@ -15,6 +15,7 @@ homepage = "https://github.com/segfaultsourcery/scaffold"
 serde_derive = "1.0"
 shellexpand = "1.0.0"
 structopt = "0.3"
+quest = "0.3"
 
 [dependencies.indexmap]
 features = ["serde-1"]

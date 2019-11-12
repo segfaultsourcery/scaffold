@@ -23,9 +23,11 @@ pub(crate) struct Arguments {
     )]
     groups_path: PathBuf,
 
-    #[structopt(short, long, about = "Ask for each dependency.")]
+    /// Ask before each dependency.
+    #[structopt(short, long, about = "Ask before adding each dependency.")]
     pub ask: bool,
 
+    /// Be more verbose.
     #[structopt(short, long)]
     pub(crate) verbose: bool,
 
