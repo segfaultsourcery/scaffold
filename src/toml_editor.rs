@@ -1,3 +1,5 @@
+use crate::error::Error;
+use crate::group_reader::Dependency;
 use crate::version_getter::VersionGetter;
 use indexmap::IndexMap;
 use serde_derive::{Deserialize, Serialize};
@@ -5,6 +7,7 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 use std::iter::FromIterator;
+use std::path::PathBuf;
 use toml::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -19,14 +22,7 @@ pub(crate) struct Config {
     version_getter: VersionGetter,
 }
 
-#[derive(Debug)]
-pub(crate) enum Error {
-    Io(std::io::Error),
-    TomlSer(toml::ser::Error),
-    TomlDe(toml::de::Error),
-}
-
-pub(crate) fn read_toml_file(path: &str) -> Result<Config, Error> {
+pub(crate) fn read_toml_file(path: &PathBuf) -> Result<Config, Error> {
     match File::open(path) {
         Ok(mut handle) => {
             let mut buffer = String::new();
@@ -42,7 +38,7 @@ pub(crate) fn read_toml_file(path: &str) -> Result<Config, Error> {
     }
 }
 
-pub(crate) fn write_toml_file(path: &str, config: &Config) -> Result<(), Error> {
+pub(crate) fn write_toml_file(path: &PathBuf, config: &Config) -> Result<(), Error> {
     match toml::to_string(config) {
         Ok(buffer) => match File::create(&path) {
             Ok(mut handle) => match handle.write_all(buffer.as_bytes()) {
@@ -78,32 +74,29 @@ impl Config {
 }
 
 impl Config {
-    pub fn add_crate(&mut self, name: &str, features: &[&str], verbose: bool) {
-        let name = name.to_string();
-        let version = self.version_getter.get_crate_version(&name).unwrap();
+    pub fn add_dependency(&mut self, dependency: &Dependency, verbose: bool) {
+        let name = dependency.name.to_string();
+        let version = dependency.get_version_as_string(&mut self.version_getter);
 
-        if features.is_empty() {
-            if verbose {
-                println!(r#"{} = "{}""#, name, version);
-            }
-            self.dependencies.insert(name, Value::String(version));
-        } else {
-            let features = features.to_vec();
-
-            if verbose {
-                println!(
-                    r#"{} = {{ version = "{}", features = {:?} }}"#,
-                    name, &version, &features
-                );
-            }
-
-            self.dependencies.insert(
-                name,
-                toml::toml! {
-                    version = version
-                    features = features
-                },
+        if verbose {
+            println!(
+                "{}",
+                &dependency.get_pretty_string(&mut self.version_getter)
             );
         }
+
+        match &dependency.other {
+            None => {
+                self.dependencies.insert(name, Value::String(version));
+            }
+            Some(other) => {
+                if let Value::Table(mut other) = other.clone() {
+                    other.insert("version".to_string(), Value::String(version));
+                    let other = Value::Table(other);
+
+                    self.dependencies.insert(name, other);
+                }
+            }
+        };
     }
 }

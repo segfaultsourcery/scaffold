@@ -1,5 +1,3 @@
-// cargo search base64 --limit 1
-
 use std::collections::HashMap;
 use std::iter::FromIterator;
 use std::process::Command;
@@ -31,18 +29,27 @@ impl VersionGetter {
         assert!(result.status.success());
 
         let output = String::from_utf8(result.stdout).unwrap();
-        let line = output.lines().nth(0).unwrap();
-        let parts = Vec::from_iter(line.split_ascii_whitespace());
 
-        let found_name = parts[0].to_string();
-        let version = parts[2].replace("\"", "");
+        match output.lines().nth(0) {
+            Some(line) => {
+                let parts = Vec::from_iter(line.split_ascii_whitespace());
 
-        if name == found_name {
-            self.stored_versions
-                .insert(name.to_string(), version.to_string());
-            Some(version)
-        } else {
-            None
+                let found_name = parts[0].to_string();
+                let version = parts[2].replace("\"", "");
+
+                if name == found_name {
+                    self.stored_versions
+                        .insert(name.to_string(), version.to_string());
+                    Some(version)
+                } else {
+                    None
+                }
+            }
+            None => {
+                self.stored_versions
+                    .insert(name.to_string(), "*".to_string());
+                None
+            }
         }
     }
 }
