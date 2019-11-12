@@ -81,6 +81,8 @@ impl Config {
         let name = dependency.name.to_string();
         let version = dependency.get_version_as_string(&mut self.version_getter);
 
+        // TODO: asking doesn't belong in this function.
+
         if arguments.ask || arguments.verbose {
             let pretty_string = dependency.get_pretty_string(&mut self.version_getter);
 
