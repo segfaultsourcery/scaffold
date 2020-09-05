@@ -9,17 +9,19 @@ This is a tool I made to automate that process.
 The help screen really says it all.
 
 ```text
-scaffold 0.2.0
+scaffold 0.3.0
 Quickly add dependencies to your Rust project.
 
 USAGE:
     scaffold [FLAGS] [OPTIONS] <SUBCOMMAND>
 
 FLAGS:
-    -a, --ask        Ask before each dependency.
+    -a, --ask        Ask before each dependency
     -h, --help       Prints help information
+    -t, --tilde      Use tilde versioning. Instead of "1.0.104", the version becomes "~1.0". See: https://doc.rust-
+                     lang.org/cargo/reference/specifying-dependencies.html#tilde-requirements
     -V, --version    Prints version information
-    -v, --verbose    Be more verbose.
+    -v, --verbose    Be more verbose
 
 OPTIONS:
     -g, --groups <groups-path>     [default: ~/.config/scaffold/groups.toml]
