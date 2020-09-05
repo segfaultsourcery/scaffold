@@ -86,21 +86,31 @@ impl Dependency {
 }
 
 impl Dependency {
-    pub fn get_version_as_string(&self, version_getter: &mut VersionGetter) -> String {
+    pub fn get_version_as_string(
+        &self,
+        version_getter: &mut VersionGetter,
+        use_tilde_version: bool,
+    ) -> String {
         match &self.version {
-            Version::Latest => match version_getter.get_crate_version(&self.name) {
-                None => {
-                    eprintln!("Could not find version for crate {:?}.", &self.name);
-                    "*".to_string()
+            Version::Latest => {
+                match version_getter.get_crate_version(&self.name, use_tilde_version) {
+                    None => {
+                        eprintln!("Could not find version for crate {:?}.", &self.name);
+                        "*".to_string()
+                    }
+                    Some(version) => version,
                 }
-                Some(version) => version,
-            },
+            }
             Version::Specific(version) => version.to_string(),
         }
     }
 
-    pub fn get_pretty_string(&self, version_getter: &mut VersionGetter) -> String {
-        let version = self.get_version_as_string(version_getter);
+    pub fn get_pretty_string(
+        &self,
+        version_getter: &mut VersionGetter,
+        use_tilde_version: bool,
+    ) -> String {
+        let version = self.get_version_as_string(version_getter, use_tilde_version);
 
         match &self.other {
             None => format!("{} = {:?}", &self.name, version),
@@ -137,7 +147,7 @@ pub(crate) fn get_groups(path: &PathBuf) -> Result<HashMap<String, Vec<Dependenc
         }
     }
 
-    for (_, group) in &mut groups {
+    for group in groups.values_mut() {
         group.sort_by_key(|it| it.name.to_string());
     }
 

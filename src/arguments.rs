@@ -6,7 +6,7 @@ use structopt::StructOpt;
     name = "scaffold",
     about = "Quickly add dependencies to your Rust project."
 )]
-pub(crate) struct Arguments {
+pub struct Arguments {
     #[structopt(
         short = "p",
         long = "path",
@@ -29,10 +29,14 @@ pub(crate) struct Arguments {
 
     /// Be more verbose.
     #[structopt(short, long)]
-    pub(crate) verbose: bool,
+    pub verbose: bool,
+
+    /// Use tilde versioning. Instead of "1.0.104", the version becomes "~1.0". See: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#tilde-requirements
+    #[structopt(short = "t", long = "tilde")]
+    pub use_tilde_version: bool,
 
     #[structopt(subcommand)]
-    pub(crate) subcommand: Subcommand,
+    pub subcommand: Subcommand,
 }
 
 #[derive(Debug, StructOpt)]

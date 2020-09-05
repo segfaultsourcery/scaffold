@@ -79,12 +79,14 @@ impl Config {
 impl Config {
     pub fn add_dependency(&mut self, dependency: &Dependency, arguments: &Arguments) {
         let name = dependency.name.to_string();
-        let version = dependency.get_version_as_string(&mut self.version_getter);
+        let version =
+            dependency.get_version_as_string(&mut self.version_getter, arguments.use_tilde_version);
 
         // TODO: asking doesn't belong in this function.
 
         if arguments.ask || arguments.verbose {
-            let pretty_string = dependency.get_pretty_string(&mut self.version_getter);
+            let pretty_string =
+                dependency.get_pretty_string(&mut self.version_getter, arguments.use_tilde_version);
 
             if arguments.ask {
                 print!("Add {}? [Y/n] ", pretty_string);

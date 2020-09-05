@@ -69,7 +69,10 @@ fn list_groups(arguments: &Arguments) -> Result<(), Error> {
         println!("{}", name);
 
         for dependency in dependencies {
-            println!("    {}", dependency.get_pretty_string(&mut version_getter));
+            println!(
+                "    {}",
+                dependency.get_pretty_string(&mut version_getter, arguments.use_tilde_version)
+            );
         }
     }
 
