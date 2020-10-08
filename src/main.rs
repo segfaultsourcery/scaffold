@@ -5,6 +5,7 @@ use crate::version_getter::VersionGetter;
 use arguments::Arguments;
 use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
+use std::process::exit;
 use structopt::StructOpt;
 
 mod arguments;
@@ -16,19 +17,40 @@ mod version_getter;
 
 fn main() {
     let arguments: Arguments = Arguments::from_args();
-    ensure_groups_exist(&arguments).expect("Failed to create default scaffolding.");
+    if let Err(error) = ensure_groups_exist(&arguments) {
+        eprintln!("Failed to create default scaffolding: {}", error);
+        exit(1);
+    }
 
     match &arguments.subcommand {
         Subcommand::List => {
-            list_groups(&arguments).expect("Failed to read groups.");
+            if let Err(error) = list_groups(&arguments) {
+                eprintln!("Failed to read groups: {}", error);
+                exit(1);
+            }
         }
         Subcommand::Add { group_names } => {
-            let mut toml = toml_editor::read_toml_file(&arguments.get_toml_path()).unwrap();
+            let mut toml = match toml_editor::read_toml_file(&arguments.get_toml_path()) {
+                Ok(toml) => toml,
+                Err(_) => {
+                    eprintln!(
+                        "Could not read TOML file at the specified path: {:?}.",
+                        &arguments.get_toml_path()
+                    );
+                    exit(1);
+                }
+            };
 
-            add_groups(&mut toml, &group_names, &arguments).expect("Failure");
+            if let Err(error) = add_groups(&mut toml, &group_names, &arguments) {
+                eprintln!("Could not add specified groups: {}", error);
+                exit(1);
+            }
 
             toml.sort_dependencies();
-            toml_editor::write_toml_file(&arguments.get_toml_path(), &toml).unwrap();
+            if let Err(error) = toml_editor::write_toml_file(&arguments.get_toml_path(), &toml) {
+                eprintln!("Could not write TOML file: {}", error);
+                exit(1);
+            }
         }
     }
 }
@@ -43,7 +65,10 @@ fn ensure_groups_exist(arguments: &Arguments) -> Result<(), Error> {
     match path.parent() {
         None => {}
         Some(parent) => {
-            create_dir_all(parent).unwrap();
+            if let Err(error) = create_dir_all(parent) {
+                eprintln!("Failed to create default path: {}", error);
+                exit(1);
+            };
         }
     }
 

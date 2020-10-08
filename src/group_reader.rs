@@ -63,7 +63,7 @@ impl Dependency {
                     other,
                 })
             }
-            Value::Table(table) => {
+            Value::Table(mut table) => {
                 let name = name.to_string();
 
                 let version = match table.get("version").and_then(|it| it.as_str()) {
@@ -71,7 +71,6 @@ impl Dependency {
                     Some(version) => Version::from_str(version).unwrap(),
                 };
 
-                let mut table = table.clone();
                 table.remove("version");
 
                 Some(Self {
