@@ -18,7 +18,16 @@ impl Default for VersionGetter {
 impl VersionGetter {
     pub fn get_crate_version(&mut self, name: &str, use_tilde_version: bool) -> Option<String> {
         if self.stored_versions.contains_key(name) {
-            return self.stored_versions.get(name).cloned();
+            return match self.stored_versions.get(name).cloned() {
+                Some(version) => {
+                    if use_tilde_version {
+                        Self::make_tilde_version(&version)
+                    } else {
+                        Some(version)
+                    }
+                }
+                None => None,
+            };
         }
 
         let result = Command::new("cargo")
