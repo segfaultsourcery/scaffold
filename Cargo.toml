@@ -1,5 +1,5 @@
 [package]
-version = "0.3.1"
+version = "0.4.0"
 license = "MIT"
 documentation = "https://github.com/segfaultsourcery/scaffold"
 readme = "README.md"
