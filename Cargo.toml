@@ -1,15 +1,15 @@
 [package]
-version = "0.3.0"
-edition = "2018"
-name = "scaffold"
-description = "Quickly add dependencies to your Rust project."
-homepage = "https://github.com/segfaultsourcery/scaffold"
+version = "0.3.1"
 license = "MIT"
-categories = ["command-line-utilities", "config", "development-tools", "text-editors"]
-authors = ["Kim Hermansson <h4xrk1m@gmail.com>"]
 documentation = "https://github.com/segfaultsourcery/scaffold"
-keywords = ["toml", "cargo", "scaffold", "productivity"]
 readme = "README.md"
+edition = "2018"
+authors = ["Kim Hermansson <h4xrk1m@gmail.com>"]
+name = "scaffold"
+categories = ["command-line-utilities", "config", "development-tools", "text-editors"]
+description = "Quickly add dependencies to your Rust project."
+keywords = ["toml", "cargo", "scaffold", "productivity"]
+homepage = "https://github.com/segfaultsourcery/scaffold"
 
 [dependencies]
 quest = "^0.3"
